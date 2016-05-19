@@ -1,0 +1,14 @@
+# Build Directory
+build
+
+#Log files
+*.log
+
+#Hidden OS files
+.DS_Store
+
+#Data directories
+data
+
+#Zipped files
+*.gz
