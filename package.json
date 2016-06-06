@@ -1,5 +1,5 @@
 {
-    "name": "seif",
+    "name": "seif-protocol",
     "version": "1.0.0",
     "description": "Node.js Implementation of Seif protocol",
     "contributors": [{

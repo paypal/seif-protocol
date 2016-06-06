@@ -1,3 +1,3 @@
-var seif = require("seif");
+var seifProtocol = require("seif-protocol");
 
-console.log(seif);
+console.log(seifProtocol);
