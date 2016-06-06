@@ -1,6 +1,6 @@
 'use strict';
 
-let seif = require('seif')({folder: __dirname});
+let seif = require('seif-protocol')({folder: __dirname});
 let prompt = require('prompt');
 let redis = require('redis');
 let createCache = require('./cache');
