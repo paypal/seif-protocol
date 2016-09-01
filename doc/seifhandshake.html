@@ -1,0 +1,50 @@
+<html>
+<head>
+<style>
+</style>
+<title>The Seif Handshake</title>
+</head>
+
+<body>
+<h1>The Seif Handshake</h1>
+<p>Douglas Crockford<br>
+PayPal</p>
+<p>2016-09-01</p>
+<h2>Put'er There</h2>
+<p>The World Wide Web does an adequate job of document retrieval, but is has  deficiencies when viewed as an application delivery system, being cursed with weaknesses in functionality and security. <a href="http://www.seif.space/">The Seif Project </a>intends to remedy that.</p>
+<p>The Seif Protocol is a message delivery system using secure <a href="http://www.JSON.org/">JSON</a> over TCP/IP. The Seif Handshake is the part of the protocol that establishes a secure session between two parties.</p>
+<p>The Seif System assumes that every party has a pair of keys, a Public Key  (<b>P</b>) that acts as the party's globally unique identifier, and a closely held Private Key (<b>R</b>) that is shared with no one. Information that is encrypted with the Public Key  (<b>P</b>) can only be decrypted with the corresponding Private Key (<b>R</b>). It is by the act of decryption that a party can prove that they are the holder of the Public Key .</p>
+<p>Alice wants to connect with Bob. Before the session begins Alice has her key pair (<b>P</b><sub>A</sub>, <strong>R</strong><sub>A</sub>). She also has Bob's Public Key  (<b>P</b><sub>B</sub>) and Bob's IP address. Bob has his own key pair (<b>P</b><sub>B</sub>, <strong>R</strong><sub>B</sub>). Bob might have Alice's Public Key  (<b>P</b><sub>A</sub>) if they have a pre-existing relationship, but Bob may not know that Alice is about to connect..</p>
+<h2>Alice's Message</h2>
+<p>Alice generates a random <strong>H</strong>, a symmetric encryption key.</p>
+<p>Alice's first message is sent in the clear. </p>
+<blockquote>
+  <p><code>{&quot;seif&quot;: 1,</code> <strong>P</strong><sub>B</sub>(<strong>H</strong>)<code>,</code> <strong>H</strong>(<b>P</b><sub>A</sub>)<code>}</code></p>
+</blockquote>
+<p>The <code>seif</code> property indicates that this is a Seif Protocol handshake. The 1 indicates the version number of the Seif Protocol. This allows us to adapt the protocol over time. For example, if the cryptographic system proves to be too weak, the <code>seif</code> version can be advanced to a stronger system.</p>
+<p>The message contains Alice's random <strong>H</strong>, encrypted with Bob's Public Key  (<b>P</b><sub>B</sub>) . Only Bob can recover Alice's <strong>H</strong>.</p>
+<p>The message contains Alice's Public Key  (<b>P</b><sub>A</sub>) encrypted with Alice's <strong>H</strong>. This allows Bob to know who is attempting to connect. Encrypting Alice's Public Key  (<b>P</b><sub>A</sub>) provides a little bit of privacy, but traffic analysis could probably determine who Alice is, even without obtaining the use of <strong>H</strong>.</p>
+<p>Alice's message could contain other information encrypted with <strong>H</strong>, such as a referral code or a request.</p>
+<h2>Bob's Message</h2>
+<p>Bob received Alice's message. Bob generates a random <strong>S</strong> that will be used as a symmetric session encryption key for future messages.</p>
+<p>Bob's first message is encrypted with Alice's <strong>H</strong>.</p>
+<blockquote>
+  <p><strong>H</strong>({<strong>P</strong><sub>A</sub>(<strong>S</strong>)})</p>
+</blockquote>
+<p>Bob's message contains <strong>S</strong> encrypted with Alice's Public Key (<b>P</b><sub>A</sub>). All subsequent messages sent by Alice and Bob will be encrypted by <strong>S</strong>.</p>
+<p>Bob's message could contain other information. </p>
+<p>Alice has <strong>H</strong> so she can decrypt the message, and she has her Private Key (<b>R</b><sub>A</sub>) so she can decrypt the session key <strong>S</strong> .</p>
+<p>Bob can send <strong>S</strong>-encrypted messages immediately. Bob does not have to wait for Alice to send a second message.</p>
+<h2>Properties</h2>
+<p>The Seif Handshake has some nice properties:</p>
+<p>Given an underlying TCP connection, a secure session is set up with one round trip.</p>
+<p>A man-in-the-middle  requires knowledge of both Private Keys.</p>
+<p>Forward secrecy for the session is retained as long as either Private Key  is kept private.</p>
+<p>Alice and Bob have both proven that they hold their Private Keys. For many applications no additional authentication is required.</p>
+<h2>Discussion</h2>
+<p>The Seif Handshake does some obvious things with Public Key  Cryptography. So why haven't we seen this before? </p>
+<p>Public Keys  are an excellent alternative to user names and passwords. While it is well understood that passwords work poorly for humans at scale, there has been a strong reluctance to consider better alternatives.</p>
+<p>The  World Wide Web has been remarkably influential. There are patterns of thought that are enforced by the Web. After a few decades, non-web thinking has become very difficult. For example, there is the problem of how Alice acquires Bob's Public Key  (<b>P</b><sub>B</sub>). Netscape chose to have Bob provide Bob's Public Key  (<b>P</b><sub>B</sub>) in response to Alice's attempt to connect, along with certification that Alice should trust this highly dubious process. This might have made sense in 1995, but today we have much better options for distribution of Public Keys. The old constraints are hard to give up, so it is difficult for many security practitioners to imagine a secure system that does not rely on PKI certificate authorities, despite the experience that certificate authorities are not reliable.</p>
+<p>In 1995 Public Key  operations were computationally prohibitively expensive. Yahoo did not start using SSL at scale until 2006 because it could not afford the computation. So something like the Seif Handshake that requires <i>two</i> Public Key  operations seems unimaginable. But three fundamental things have changed since then. Moore's Law has continued to reduce the cost of cryptography, and we now have Elliptic Curve Cryptography, which offers cryptographic strength at a significantly lower cost, and we have specialized hardware. In today's technology, it is now feasible for all devices to do two Public Key  operations on setting up a session. The cost of computation is more than compensated for by the elimination of network round trips.</p>
+</body>
+</html>
