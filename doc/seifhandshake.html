@@ -1,11 +1,20 @@
 <html>
 <head>
 <style>
+body {
+	background-color: linen;
+	margin: 10%;
+}
+
+p {
+	text-align: justify;
+}
 </style>
 <title>The Seif Handshake</title>
 </head>
 
 <body>
+<img src="seif-protocol-150.png" align="right">
 <h1>The Seif Handshake</h1>
 <p>Douglas Crockford<br>
 PayPal</p>
@@ -13,11 +22,11 @@ PayPal</p>
 <h2>Put'er There</h2>
 <p>The World Wide Web does an adequate job of document retrieval, but is has  deficiencies when viewed as an application delivery system, being cursed with weaknesses in functionality and security. <a href="http://www.seif.space/">The Seif Project </a>intends to remedy that.</p>
 <p>The Seif Protocol is a message delivery system using secure <a href="http://www.JSON.org/">JSON</a> over TCP/IP. The Seif Handshake is the part of the protocol that establishes a secure session between two parties.</p>
-<p>The Seif System assumes that every party has a pair of keys, a Public Key  (<b>P</b>) that acts as the party's globally unique identifier, and a closely held Private Key (<b>R</b>) that is shared with no one. Information that is encrypted with the Public Key  (<b>P</b>) can only be decrypted with the corresponding Private Key (<b>R</b>). It is by the act of decryption that a party can prove that they are the holder of the Public Key .</p>
-<p>Alice wants to connect with Bob. Before the session begins Alice has her key pair (<b>P</b><sub>A</sub>, <strong>R</strong><sub>A</sub>). She also has Bob's Public Key  (<b>P</b><sub>B</sub>) and Bob's IP address. Bob has his own key pair (<b>P</b><sub>B</sub>, <strong>R</strong><sub>B</sub>). Bob might have Alice's Public Key  (<b>P</b><sub>A</sub>) if they have a pre-existing relationship, but Bob may not know that Alice is about to connect..</p>
+<p>The Seif System assumes that every party has a pair of keys, a Public Key  (<b>P</b>) that acts as the party's globally unique identifier, and a closely held Private Key (<b>R</b>) that is shared with no one. Information that is encrypted with the Public Key  (<b>P</b>) can only be decrypted with the corresponding Private Key (<b>R</b>). It is by the act of decryption that a party can prove that they are the holder of the Public Key.</p>
+<p>Alice wants to connect with Bob. Before the session begins Alice has her key pair (<b>P</b><sub>A</sub>, <strong>R</strong><sub>A</sub>). She also has Bob's Public Key  (<b>P</b><sub>B</sub>) and Bob's IP address. Bob has his own key pair (<b>P</b><sub>B</sub>, <strong>R</strong><sub>B</sub>). Bob might have Alice's Public Key  (<b>P</b><sub>A</sub>) if they have a pre-existing relationship, but Bob may not know that Alice is about to connect.</p>
 <h2>Alice's Message</h2>
 <p>Alice generates a random <strong>H</strong>, a symmetric encryption key.</p>
-<p>Alice's first message is sent in the clear. </p>
+<p>Alice's first message is sent in the clear.</p>
 <blockquote>
   <p><code>{&quot;seif&quot;: 1,</code> <strong>P</strong><sub>B</sub>(<strong>H</strong>)<code>,</code> <strong>H</strong>(<b>P</b><sub>A</sub>)<code>}</code></p>
 </blockquote>
