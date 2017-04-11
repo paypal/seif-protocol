@@ -9,7 +9,7 @@ Getting Started
 From your project directory, run (see below for requirements):
 
 ```
-$ npm install seif
+$ npm install seif-protocol
 ```
 
 Alternatively, to use the latest development version from Github:
@@ -21,9 +21,9 @@ $ npm install <git-path>
 Requirements
 ============
 
-1. bunyan
-2. prompt
-3. seifnode (https://github.com/paypal/seifnode)
+1. seifnode (https://github.com/paypal/seifnode)
+2. bunyan
+
 
 Examples
 ========
@@ -33,133 +33,142 @@ Please refer to the "examples" directory to see examples of how to use the proto
 Usage
 =====
 
-**Creating a party identity:**
+**Creating an entity's identity:**
 
 Seif protocol enables communication between seif parties. A seif party is capable of
-connecting and communicating with another seif party.
+connecting and communicating with another seif party.The identity of a seif party is
+uniquely characterized by the associated entity.
 
-The identity of a seif party is uniquely characterized by its login credentials, i.e., username and password.
+An entity's identity is composed of an ECC-512 (Elliptic curve cryptography) {publickey, privatekey} pair and a RNG (Random Number Generator) state. The {publickey, privatekey} pair is generated using an entropy pool mined from available external sources, including camera, microphone and the OS. The RNG too is seeded from a different entropy pool mined similarly.
 
-Given an username and password, the party is initialized with a ECC-512 (Elliptic curve cryptography) {publickey, privatekey}, making this party uniquely identifiable in the world. The {publickey, privatekey} pair is generated from an entropy pool mined from available external sources, including camera, microphone and the OS.
-
-The party is also associated with a random number generator (ISAAC) which is seeded at this time from available external sources of entropy, including camera, microphone and the OS.
-
-A party can be uniquely created by running:
+An entity's identity can be created by running:
 
 ```
 $ node install.js
 ```
 
-Prompts will be made to aquire location where party details are to be saved and
-login credentials, i.e., username and password, to enable instantiation of the same.
+Prompts will be made to aquire location where the entity's identity is to be saved,
+the entity's ID and a password. The entity's ID is used to locate the identity in
+the provided location and the password is used to secure it.
 
 **Initializing a party:**
 
 The protocol can be used in node.js just like any other module.
 
 ```javascript
-let seif = require("seif");
+let seifProtocolModule = require("seif-protocol");
 ```
 
 To instantiate the protocol interface, the exported function can be used as below:
 
 ```javascript
-let seif = require("seif");
-let seif = seif.initializeProtocol({
+let seifProtocolModule = require("seif-protocol");
+let seifProtocol = seifProtocolModule.initializeProtocol({
     folder: __dirname
 });
-// Folder is the location with party identifying {publickey, privatekey},
-// random number state and other party specific files.
+// Folder is the location with identities of entities.
 ```
 
 The returned "seif" object contains the following functions:
 
-**function initializeParty(details, function callback(party, error){...})**
+**function initializeEntity(authDetails, function callback(partyGenerator, error){...})**
 
-This function initializes a party from the specifed location using provided
-login credentials. This information should be presented to the protocol as an
-object which can include optional parameters.
+This function provides access to a party generator linked to the entity's identity
+from the specifed location.
 
 ```javascript
 seif.initializeParty(
     {
-        username,
+        entity,
         password,
-        hostCache,
-        sessionCache,
-        persistentQueue
+        hostCache
     },
-    function callback(party, error){
+    function callback(partyGenerator, error){
         if (error === undefined) {
-            console.log("Initialized party successfully.");
+            console.log("Retrieved identity successfully. Can create a party now.");
+            let party = partyGenerator();
+            // party cen be used as an initiator or a listener.
         } else {
-            console.log("Error initializing party.");
+            console.log("Error retrieving identity.");
             console.log(error);
         }
     }
 );
 
-// 'username'        is the name that identifies the party; it is the name of the
-//                   folder location holding party identity. [Required].
+// 'entity'          locates the folder with the entity's identity. [Required].
 //
-// 'password'        is the encryption/decryption string enabling access to party
+// 'password'        is the encryption/decryption string used to secure the entity's
 //                   identity. [Required].
 //
 // 'hostCache'       is a key value store with read, write and clear capabilities. This
-//                   cache is used to store/lookup connection specific information such
-//                   as publickeys, userid etc. [Optional].
+//                   cache is used to store/lookup publickeys. [Optional].
 //
-// 'sessionCache'    is a key value store with read, write and clear capabilities. This
-//                   cache is used to store session specific information with another
-//                   party. [Optional].
-//
-// 'persistentQueue' is a queue with enqueue, dequeue and forEach capabilities. This
-//                   queue is used to cache reliable messages until confirmation. The
-//                   queue is expected to persist its contents. [Optional].
-//
-// 'callback'        is a function invoked with an initialized party capable of
-//                   connecting, listening and sending messages to other parties. If
-//                   initialization fails, error will be populated leaving the party
-//                   undefined.
+// 'callback'        is a function invoked with an party generator capable of
+//                   creating parties with the ability to connect, listen and send messages
+//                   to other parties. If initialization fails, error will be populated
+//                   leaving the party generator undefined.
 ```
 
-**function registerParty(function callback(error){...})**
+**function createEntityIdentity(function callback(error){...})**
+Creates and secures a new entity identity using the data provided and invokes
+the given callback. The entity is uniquely identified by its public/private key
+pair and RNG state used to generate session secrets.
 
-This function uniquely creates a party identity. Prompts will be made to gather
-login credentials. The party identity will be saved at the location indicated while
-initializing the protocol.
+In an effort to secure the identity, the password provided in data is hashed and
+used to protect the public/private keys generated after initializing the ECCISAAC
+object. Next, the RNG is initialized and the state file is encrypted with the
+hash of the generated private key. At this point the process is complete and the
+given callback is invoked.
+
 
 ```javascript
-seif.registerParty(function callback(error){
-    if (error === undefined) {
-        console.log("Party identity created successfully.")
-    } else {
-        console.log("Error creating party identity.");
-        console.log(error);
+seif.createEntityIdentity(
+    {
+        entity,
+        password
+    },
+    function callback(error){
+        if (error === undefined) {
+            console.log("Party identity created successfully.")
+        } else {
+            console.log("Error creating party identity.");
+            console.log(error);
+        }
     }
-}
+);
+// 'entity'          locates the folder with the entity's identity. [Required].
+//
+// 'password'        is the encryption/decryption string used to secure the entity's
+//                   identity. [Required].
 ```
+
 
 **Using a party to communicate with other parties:**
 
-An initialized party is capable of:
+A party is capable of:
 #####1. Connecting to another party.
 #####2. Listening for connections from other parties.
 #####3. Sending messages on a successful connection.
 
-Any number of parties can be instantiated with the same identity. However, a single
-instance of a party can either connect to another party or be a listener. In the case
-where a party identity needs to communicate with several other parties, a party will
-be required to be initialized with the party identity for each such connection.
+Any number of parties can be created with the same entity's identity.
+However, a party can either be an initiator of a connection or be a listener.
+As an initiator a party can communicate to only one other party at any given
+time. In the case where an entity needs to communicate with several other parties,
+each connection should be initiated by a different party. As a listener a party
+can be in communication with several initiating parties.
 
 **party.connect(properties, function connectCallback (error) {...})**
 
-Connects to a listening seif party using seif protocol. Callback is invoked with an error in case the connection is unsuccessful.
+Connects to a listening seif party using seif protocol.
+Callback is invoked with an error in case the connection is unsuccessful.
 
 ```javascript
 party.connect(
     {
-        petname: "PayPal"
+        petname: "PayPal",
+        connectAddress,
+        connectPublicKey,
+        connectionInfo
     },
     function connectCallback(error) {
         if (error !== undefined) {
@@ -172,27 +181,24 @@ party.connect(
 // properties is a frozen Object (the function freezes it if it isnt already frozen)
 //            containing the listening party's details and connection options:
 //                   connectAddress: ip-address + port
+//                   connectPublicKey: public-key                   
 //                   petName: short name to lookup
-//                   connectPublicKey: public-key
+//                   connectionInfo: unencrypted options sent in the hello initiating a new connection.
+//                      
 //            In the presence of a hostCache, the petname will be looked up.
 //            If such a cache isn’t available the connectAddress and connectPublicKey
-//            parameters are required.
+//            parameters is required.
 //
-// connectCallback is a function invoked with no error on a successful connection
-//                 with the listening party.
+// connectCallback is a function invoked with no error on a successful connection.
 ```
 
 **party.seifEventEmitter()**
 
 This function returns a reference to the event emitter. This is used by the caller to
-handle "message", "reliableMessageConfirmation", "seifError" and "close" events.
+handle "message", "seifError" and "close" events.
 
 "message": This event is emitted when a message is received by the protocol for the
            party.
-
-"reliableMessageConfirmation": This event is emitted when a delivery confirmation is
-                               received by the protocol for a reliable message sent by
-                               the party.
 
 "seifError": This event is emitted on fatal and non-fatal errors relevant to the party,
              examples may be, lost connection, unable to read/write to caches etc.
@@ -206,14 +212,6 @@ seifEventEmitter.on(
     "message",
     function (message) {
         console.log("Received Message...");
-        console.log(message);
-    }
-);
-
-seifEventEmitter.on(
-    "reliableMessageConfirmation",
-    function (message) {
-        console.log("Recieved confirmation for message:");
         console.log(message);
     }
 );
@@ -239,15 +237,14 @@ seifEventEmitter.on(
 );
 ```
 
+**party.sendNormal(options, function confirmationCallback(error) {...})**
 
-**party.sendMessage(options, function confirmationCallback(error) {...})**
-
-Sends a message to the connected listening party using the seif protocol.
+Sends a message on an establised secure connection using the seif protocol.
 
 ```javascript
-party.sendMessage(
+party.sendNormal(
     {
-        message: "message"
+        message: JSON or BLOB or [JSON, {id, blob: BLOB}..., JSON]
     },
     function confirmationCallback(error) {
         if (error === undefined) {
@@ -257,67 +254,48 @@ party.sendMessage(
 );
 
 // options is a frozen object containing message details:
-//              message - message to be sent to server
-//
+//              message - message to be sent to server. A message can be an
+//                        object serializable to JSON or a BLOB or an array of
+//                        both with the BLOBs associated with an optional id
+//                        for identification.
 // confirmationCallback is a function invoked on receiving delivery confirmation.
 //                      error is defined in the case of failure.
 ```
 
-**party.sendReliableMessage(options)**
+**party.sendStatus(options)**
 
-Sends a reliable message to the connected listening party using the seif protocol. These type of messages are guaranteed to be sent by the protocol, even if the connection is broken for what ever reason; The message will be sent once a connection is resumed. The
-persistence of the message is guaranteed by the persistent queue. Hence, a reliable
-message is guaranteed to be sent only if the party has access to a persistent queue.
-
-Delivery of reliable messages are notified on the reliableMessageConfirmation event.
+Sends a message on an establised secure connection using the seif protocol. This type of message is not guaranteed to be sent by the protocol, i.e., there isn't an
+associated delivery confirmation. This can be used for log/status/gaming messages.
 
 ```javascript
-party.sendReliable(
+party.sendStatus(
     {
-        message: "message"
+        message: JSON or BLOB or [JSON, {id, blob: BLOB}..., JSON]
     }
 );
 
 // options is a frozen object containing message details:
-//              message - message to be sent to server
+//              message - message to be sent to server. A message can be an
+//                        object serializable to JSON or a BLOB or an array of
+//                        both with the BLOBs associated with an optional id
+//                        for identification.
 ```
 
-**party.sendUnreliableMessage(options)**
+**party.listen(port, connectionListener)**
 
-Sends a message to the connected listening party using the seif protocol. These type of messages are not guaranteed to be sent by the protocol, i.e., there isn't a message
-delivery confirmation. This can be used for log/status messages etc.
-
-```javascript
-party.sendUnreliableMessage(
-    {
-        message: "message"
-    }
-);
-
-// options is a frozen object containing message details:
-//              message - message to be sent to server
-```
-
-**party.listen(port, listenOptions, connectionListener)**
-
-This function enables a party to listen to incomming connections.
+This function enables a party to listen to connection initiators.
 
 ```javascript
 party.listen(
     port,
-    {
-
-    },
     function (connection) {
 
         // Returns the connecting party's properties.
-
         let connectionInitiator = connection.initiator();
 
 
 
         // Returns the message event listener.
-
         let messageListener = connection.seifMessageListener();
         messageListener.on("message", function (message) {
             // Do something with the recieved message.
@@ -325,23 +303,29 @@ party.listen(
 
 
 
-        // Send a message to the connected party. Callback is invoked with no
-        // error on successful delivery.
-
+        // Send a normal message on the establised secure connection.
+        // Callback is invoked with no error on successful delivery.
         let message = {message: "Hello!"};
-        connection.send(message, function (error) {
+        // {message: new Buffer([..])}, {message: [JSON, ..., {id, blob: new Buffer([..])}]}
+        connection.sendNormal(message, function (error) {
             if (error === undefined) {
                 console.log("Sent message successfully");
             }
         });
 
+        // Send a status message on the establised secure connection. There is no delivery confirmation.
+        let message = {message: "Hello!"};
+        // {message: new Buffer([..])}, {message: [JSON, ..., {id, blob: new Buffer([..])}]}
+        connection.sendStatus(message);
 
 
-        // Redirect current session to another listening party.
+
+        // Redirect temporarily to another listening party.
 
         // Options can contain a petname to be looked up in the hostCache, or
-        // a connect address and a public key.
-
+        // a connect address and a public key. Options can also include
+        // connectionInfo which will be sent unencrypted on the initiating Hello
+        // to the redirect party.
         let options = {
             petname: "PayPalCheckout"
         };
@@ -357,8 +341,9 @@ party.listen(
         // Redirect current and future sessions to another listening party.
 
         // Options can contain a petname to be looked up in the hostCache, or
-        // a connect address and a public key.
-
+        // a connect address and a public key. Options can also include
+        // connectionInfo which will be sent unencrypted on the initiating Hello
+        // to the redirect party.
         let options = {
             petname: "PayPalAlternate"
         };
@@ -374,8 +359,7 @@ party.listen(
 
 
 
-        // Returns a boolean whether the server is redirecting the connection.
-
+        // Returns a boolean whether the party is redirecting the connection.
         let isRedirecting = connection.isSeifRedirecting();
         if (isRedirecting === true) {
             console.log("Connection is being redirected.");
@@ -386,17 +370,14 @@ party.listen(
 
 
         // Returns the connection properties including the connection id, which
-        // is a random number identifying the connection. The connection id is
-        // part of the session object and hence can enable ways to identify the
-        // same connection across redirects.
-
+        // is a random number identifying the connection. This can be useful
+        // when initiating parties share the same entity's identity.
         let connectionProperties = connection.seifConnectionProperties();
         console.log("Connection ID: " + connectionProperties.connectionId);
 
 
 
         // Returns the connection status.
-
         let status = connection.isStillAlive();
         if (status === true) {
             console.log("Connection is still alive.");
@@ -407,7 +388,6 @@ party.listen(
 
 
         // Ends the seif connection with the connected party.
-
         connection.end();
     }
 );
@@ -415,7 +395,7 @@ party.listen(
 
 **party.end(function endCallback(error) {...})**
 
-Ends connection with the listening party. Errors if end is called before a connection
+Ends an established connection. Error is populated if the end is called before a connection
 has or is being established.
 
 ```javascript
@@ -430,7 +410,7 @@ party.end(
 
 **party.properties()**
 
-This function returns the identity properties of the party including the publicKey.
+This function returns the publicKey of the associated entity.
 
 ```javascript
 let partyProperties = party.properties();
@@ -443,12 +423,10 @@ License
 
 The MIT License (MIT)
 
-Copyright (c) 2016 PayPal
+Copyright (c) 2016, 2017 PayPal
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-

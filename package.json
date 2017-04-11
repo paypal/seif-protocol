@@ -1,14 +1,14 @@
 {
     "name": "seif-protocol",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Node.js Implementation of Seif protocol",
     "contributors": [{
-        "name": "Rohit Harchandani",
-        "email": "harchu@gmail.com"
-    }, {
         "name": "Aashish Sheshadri",
         "email": "aashish.sheshadri@gmail.com",
         "url": "http://www.aashish.me"
+    }, {
+        "name": "Rohit Harchandani",
+        "email": "harchu@gmail.com"
     }],
     "main": "lib/secnet.js",
     "scripts": {
@@ -17,14 +17,16 @@
     },
     "dependencies": {
         "bunyan": "*",
-        "prompt": "*",
-        "seifnode": "*"
+        "seifnode": ">=1.0.3"
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/paypal/seif-protocol.git"
     },
     "license": "MIT",
+    "engines": {
+        "node": ">=6.9.2"
+    },
     "homepage": "http://www.seif.place",
     "keywords": [
         "security",
