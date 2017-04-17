@@ -240,12 +240,12 @@ seifEventEmitter.on(
 );
 ```
 
-**party.sendNormal(options, function confirmationCallback(error) {...})**
+**party.send(options, function confirmationCallback(error) {...})**
 
 Sends a message on an establised secure connection using the seif protocol.
 
 ```javascript
-party.sendNormal(
+party.send(
     {
         message: JSON or BLOB or [JSON, {id, blob: BLOB}..., JSON]
     },
