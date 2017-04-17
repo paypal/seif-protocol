@@ -1,5 +1,5 @@
-seif
-====
+seif-protocol
+=============
 
 Node.js Implementation of the Seif protocol
 
