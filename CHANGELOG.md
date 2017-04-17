@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-# [Unreleased]
+# [1.0.2] - 2017-04-17
 ### Added
 - Support to send a buffer, JSON serializable object or an array of such as a message.
 - Ability to generate multiple parties based on an entity's identity.
