@@ -1,3 +1,3 @@
-var seifProtocol = require("seif-protocol");
+var seif = require("./lib/secnet.js");
 
-console.log(seifProtocol);
+console.log(seif);
