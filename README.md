@@ -146,9 +146,12 @@ seif.createEntityIdentity(
 **Using a party to communicate with other parties:**
 
 A party is capable of:
-#####1. Connecting to another party.
-#####2. Listening for connections from other parties.
-#####3. Sending messages on a successful connection.
+
+##### 1. Connecting to another party.
+
+##### 2. Listening for connections from other parties.
+
+##### 3. Sending messages on a successful connection.
 
 Any number of parties can be created with the same entity's identity.
 However, a party can either be an initiator of a connection or be a listener.
