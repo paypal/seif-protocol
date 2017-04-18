@@ -18,4 +18,4 @@ All notable changes to this project will be documented in this file.
 - Initiating `hello` includes an unencrypted field `connectionInfo` providing optional context to a connection.
 - Removed redirect with the use of pre-authorized sessions and updated redirects now establish new connections with possible context provided in `connectionInfo` which is part of an initiating `hello`.
 - Identity creation reflects strength of entropy pool used.
-- Necessary changes made to be compatable with seifnode 1.0.3.
+- Necessary changes made to be compatible with seifnode 1.0.3.
