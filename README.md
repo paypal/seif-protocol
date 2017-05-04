@@ -15,7 +15,7 @@ $ npm install seif-protocol
 Alternatively, to use the latest development version from Github:
 
 ```
-$ npm install <git-path>
+$ npm install https://github.com/paypal/seif-protocol.git
 ```
 
 Requirements
@@ -184,10 +184,10 @@ party.connect(
 // properties is a frozen Object (the function freezes it if it isnt already frozen)
 //            containing the listening party's details and connection options:
 //                   connectAddress: ip-address + port
-//                   connectPublicKey: public-key                   
+//                   connectPublicKey: public-key
 //                   petName: short name to lookup
 //                   connectionInfo: unencrypted options sent in the hello initiating a new connection.
-//                      
+//
 //            In the presence of a hostCache, the petname will be looked up.
 //            If such a cache isn’t available the connectAddress and connectPublicKey
 //            parameters is required.
